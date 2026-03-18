@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role           String   @default("CLOSER")
+  commissionRate Float    @default(0)
+  createdAt      DateTime @default(now())
+
+  deals             Deal[]        @relation("CloserDeals")
+  setterDeals       Deal[]        @relation("SetterDeals")
+  validatedPayments Installment[] @relation("ValidatedBy")
+}
+
+model Deal {
+  id                     String   @id @default(cuid())
+  clientName             String
+  totalAmount            Float
+  notes                  String?
+  closedAt               DateTime @default(now())
+  createdAt              DateTime @default(now())
+
+  closer                 User          @relation("CloserDeals", fields: [closerId], references: [id])
+  closerId               String
+  setter       User?         @relation("SetterDeals", fields: [setterId], references: [id])
+  setterId     String?
+  installments Installment[]
+}
+
+model Installment {
+  id                String    @id @default(cuid())
+  installmentNumber Int
+  dueDate           DateTime
+  expectedAmount    Float
+  paidAmount        Float?
+  status            String    @default("PENDING")
+  paidAt            DateTime?
+  comment           String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  deal          Deal   @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  dealId        String
+  validator     User?  @relation("ValidatedBy", fields: [validatedById], references: [id])
+  validatedById String?
+}

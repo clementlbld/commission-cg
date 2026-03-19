@@ -16,8 +16,10 @@ interface Setter {
 
 export default function NewDealForm({ setters }: { setters: Setter[] }) {
   const router = useRouter();
+  const today = new Date().toISOString().split("T")[0];
   const [clientName, setClientName] = useState("");
   const [notes, setNotes] = useState("");
+  const [closedAt, setClosedAt] = useState(today);
   const [setterId, setSetterId] = useState("");
   const [installments, setInstallments] = useState<Installment[]>([{ dueDate: "", amount: "" }]);
   const [loading, setLoading] = useState(false);
@@ -55,6 +57,7 @@ export default function NewDealForm({ setters }: { setters: Setter[] }) {
         body: JSON.stringify({
           clientName,
           notes,
+          closedAt,
           setterId: setterId || null,
           installments: installments.map((i) => ({ dueDate: i.dueDate, amount: parseFloat(i.amount) })),
         }),
@@ -80,6 +83,13 @@ export default function NewDealForm({ setters }: { setters: Setter[] }) {
       {/* Infos client */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
         <h2 className="font-semibold text-gray-900">Informations client</h2>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Date de signature *</label>
+          <input
+            type="date" value={closedAt} onChange={(e) => setClosedAt(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nom du client *</label>
           <input

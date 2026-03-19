@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { clientName, notes, installments, setterId } = body;
+  const { clientName, notes, installments, setterId, closedAt } = body;
 
   if (!clientName || !installments?.length) {
     return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
       totalAmount,
       closerId: session.user.id,
       setterId: setterId || undefined,
+      closedAt: closedAt ? new Date(closedAt) : new Date(),
       installments: {
         create: installments.map((inst: { dueDate: string; amount: number }, idx: number) => ({
           installmentNumber: idx + 1,

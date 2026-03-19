@@ -49,6 +49,18 @@ async function main() {
     },
   });
 
+  const setter1 = await prisma.user.upsert({
+    where: { email: "hugo@app.fr" },
+    update: {},
+    create: {
+      name: "Hugo Setter",
+      email: "hugo@app.fr",
+      passwordHash: await bcrypt.hash("setter123", 10),
+      role: "SETTER",
+      commissionRate: 10,
+    },
+  });
+
   // Deal 1: Alex — 5000€ en 4 fois avec acompte
   const deal1 = await prisma.deal.create({
     data: {
@@ -56,6 +68,7 @@ async function main() {
       totalAmount: 5000,
       notes: "Accompagnement business 6 mois, signé le 15/03",
       closerId: closer1.id,
+      setterId: setter1.id,
       closedAt: new Date("2026-03-15"),
       installments: {
         create: [
@@ -97,6 +110,7 @@ async function main() {
       clientName: "Marie Fontaine",
       totalAmount: 3000,
       closerId: closer1.id,
+      setterId: setter1.id,
       closedAt: new Date("2026-02-01"),
       installments: {
         create: [
@@ -158,14 +172,89 @@ async function main() {
     },
   });
 
+  // Deal 4: Hugo setter — Janvier 2026, tout payé
+  const deal4 = await prisma.deal.create({
+    data: {
+      clientName: "Sophie Leclerc",
+      totalAmount: 4000,
+      notes: "Mentorat 3 mois — apporté par Hugo",
+      closerId: closer1.id,
+      setterId: setter1.id,
+      closedAt: new Date("2026-01-05"),
+      installments: {
+        create: [
+          {
+            installmentNumber: 1,
+            dueDate: new Date("2026-01-05"),
+            expectedAmount: 2000,
+            paidAmount: 2000,
+            status: "PAID",
+            paidAt: new Date("2026-01-06"),
+            validatedById: compta.id,
+          },
+          {
+            installmentNumber: 2,
+            dueDate: new Date("2026-02-05"),
+            expectedAmount: 2000,
+            paidAmount: 2000,
+            status: "PAID",
+            paidAt: new Date("2026-02-06"),
+            validatedById: compta.id,
+          },
+        ],
+      },
+    },
+  });
+
+  // Deal 5: Hugo setter — Février 2026, tout payé
+  const deal5 = await prisma.deal.create({
+    data: {
+      clientName: "Nicolas Petit",
+      totalAmount: 6000,
+      notes: "Coaching business 12 semaines",
+      closerId: closer2.id,
+      setterId: setter1.id,
+      closedAt: new Date("2026-02-10"),
+      installments: {
+        create: [
+          {
+            installmentNumber: 1,
+            dueDate: new Date("2026-02-10"),
+            expectedAmount: 2000,
+            paidAmount: 2000,
+            status: "PAID",
+            paidAt: new Date("2026-02-11"),
+            validatedById: compta.id,
+          },
+          {
+            installmentNumber: 2,
+            dueDate: new Date("2026-03-10"),
+            expectedAmount: 2000,
+            paidAmount: 2000,
+            status: "PAID",
+            paidAt: new Date("2026-03-10"),
+            validatedById: compta.id,
+          },
+          {
+            installmentNumber: 3,
+            dueDate: new Date("2026-04-10"),
+            expectedAmount: 2000,
+            status: "PENDING",
+          },
+        ],
+      },
+    },
+  });
+
   console.log("✅ Seed terminé !");
   console.log("");
   console.log("Comptes créés :");
   console.log("  Compta  : compta@app.fr   / compta123");
   console.log("  Closer 1: alex@app.fr     / closer123");
   console.log("  Closer 2: lea@app.fr      / closer123");
+  console.log("  Setter 1: hugo@app.fr     / setter123  (10% commission)");
   console.log("");
-  console.log(`Deals créés : ${deal1.id}, ${deal2.id}, ${deal3.id}`);
+  console.log(`Deals créés : ${deal1.id}, ${deal2.id}, ${deal3.id}, ${deal4.id}, ${deal5.id}`);
 }
 
 main()

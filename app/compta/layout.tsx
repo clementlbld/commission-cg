@@ -19,6 +19,9 @@ export default async function ComptaLayout({ children }: { children: React.React
             <Link href="/compta/closers" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">
               Closers
             </Link>
+            <Link href="/compta/setters" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">
+              Setters
+            </Link>
             <Link href="/compta/utilisateurs" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">
               Accès
             </Link>

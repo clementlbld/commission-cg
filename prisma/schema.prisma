@@ -55,4 +55,8 @@ model Installment {
   dealId        String
   validator     User?  @relation("ValidatedBy", fields: [validatedById], references: [id])
   validatedById String?
+
+  @@index([status, dueDate])
+  @@index([status, paidAt])
+  @@index([dealId])
 }

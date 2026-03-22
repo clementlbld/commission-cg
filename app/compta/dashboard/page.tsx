@@ -42,7 +42,6 @@ function getPeriodBounds(
     const end = new Date(year, 11, 31, 23, 59, 59);
     return { start, end, label: `Année ${year}` };
   }
-  // month (default)
   const start = new Date(year, month - 1, 1);
   const end = new Date(year, month, 0, 23, 59, 59);
   const label = start.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
@@ -65,34 +64,32 @@ export default async function ComptaDashboard({
 
   const { start, end, label } = getPeriodBounds(type, year, month, quarter, weekStart);
 
-  const closers = await prisma.user.findMany({
-    where: { role: "CLOSER" },
-    include: {
-      deals: {
-        include: { installments: true },
+  // 3 requêtes en parallèle — seulement les champs nécessaires
+  const [allPaidInPeriod, allOverdue, closers] = await Promise.all([
+    prisma.installment.findMany({
+      where: { status: "PAID", paidAt: { gte: start, lte: end } },
+      select: { paidAmount: true, paidAt: true, deal: { select: { closerId: true } } },
+    }),
+    prisma.installment.findMany({
+      where: { status: { in: ["PENDING", "PARTIAL"] }, dueDate: { lt: now } },
+      select: { expectedAmount: true, deal: { select: { closerId: true } } },
+    }),
+    prisma.user.findMany({
+      where: { role: "CLOSER" },
+      select: {
+        id: true,
+        name: true,
+        commissionRate: true,
+        _count: { select: { deals: true } },
       },
-    },
-    orderBy: { name: "asc" },
-  });
-
-  const allPaidInPeriod = await prisma.installment.findMany({
-    where: {
-      status: "PAID",
-      paidAt: { gte: start, lte: end },
-    },
-    include: { deal: { include: { closer: true } } },
-  });
-
-  const allOverdue = await prisma.installment.findMany({
-    where: {
-      status: { in: ["PENDING", "PARTIAL"] },
-      dueDate: { lt: now },
-    },
-  });
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   const totalCashInPeriod = allPaidInPeriod.reduce((s, i) => s + (i.paidAmount ?? 0), 0);
+  const totalOverdueAmount = allOverdue.reduce((s, i) => s + i.expectedAmount, 0);
 
-  // Ventilation par jour (pour la semaine) ou par semaine (pour le mois)
+  // Ventilation par sous-période (calcul JS sur données déjà filtrées)
   let breakdown: { label: string; cash: number }[] = [];
   if (type === "week") {
     const days = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
@@ -108,7 +105,6 @@ export default async function ComptaDashboard({
       return { label: dayLabel, cash };
     });
   } else if (type === "month") {
-    // Ventilation par semaine du mois
     const current = new Date(start);
     while (current <= end) {
       const weekEnd = new Date(current);
@@ -122,51 +118,51 @@ export default async function ComptaDashboard({
       current.setDate(current.getDate() + 7);
     }
   } else if (type === "quarter") {
-    // Ventilation par mois
     for (let m = 0; m < 3; m++) {
       const mStart = new Date(year, (quarter - 1) * 3 + m, 1);
       const mEnd = new Date(year, (quarter - 1) * 3 + m + 1, 0, 23, 59, 59);
       const cash = allPaidInPeriod
         .filter((i) => i.paidAt && i.paidAt >= mStart && i.paidAt <= mEnd)
         .reduce((s, i) => s + (i.paidAmount ?? 0), 0);
-      const mLabel = mStart.toLocaleDateString("fr-FR", { month: "long" });
-      breakdown.push({ label: mLabel, cash });
+      breakdown.push({ label: mStart.toLocaleDateString("fr-FR", { month: "long" }), cash });
     }
   } else {
-    // Ventilation par mois pour l'année
     for (let m = 0; m < 12; m++) {
       const mStart = new Date(year, m, 1);
       const mEnd = new Date(year, m + 1, 0, 23, 59, 59);
       const cash = allPaidInPeriod
         .filter((i) => i.paidAt && i.paidAt >= mStart && i.paidAt <= mEnd)
         .reduce((s, i) => s + (i.paidAmount ?? 0), 0);
-      const mLabel = mStart.toLocaleDateString("fr-FR", { month: "short" });
-      breakdown.push({ label: mLabel, cash });
+      breakdown.push({ label: mStart.toLocaleDateString("fr-FR", { month: "short" }), cash });
     }
   }
 
   const maxCash = Math.max(...breakdown.map((b) => b.cash), 1);
 
+  // Stats par closer groupées en JS (pas de requêtes supplémentaires)
+  const cashByCloser = new Map<string, number>();
+  for (const i of allPaidInPeriod) {
+    const id = i.deal.closerId;
+    cashByCloser.set(id, (cashByCloser.get(id) ?? 0) + (i.paidAmount ?? 0));
+  }
+  const overdueByCloser = new Map<string, number>();
+  for (const i of allOverdue) {
+    const id = i.deal.closerId;
+    overdueByCloser.set(id, (overdueByCloser.get(id) ?? 0) + 1);
+  }
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      {/* En-tête */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Tableau de bord Compta</h1>
           <p className="text-gray-500 text-sm mt-1 capitalize">{label}</p>
         </div>
         <Suspense>
-          <PeriodSelector
-            periodType={type}
-            year={year}
-            month={month}
-            quarter={quarter}
-            weekStart={weekStart}
-          />
+          <PeriodSelector periodType={type} year={year} month={month} quarter={quarter} weekStart={weekStart} />
         </Suspense>
       </div>
 
-      {/* KPI globaux */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <p className="text-sm text-gray-500">Cash total collecté</p>
@@ -176,7 +172,7 @@ export default async function ComptaDashboard({
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <p className="text-sm text-gray-500">Mensualités en retard</p>
           <p className="text-3xl font-bold text-red-600 mt-1">{allOverdue.length}</p>
-          <p className="text-xs text-gray-400 mt-1">{formatEur(allOverdue.reduce((s, i) => s + i.expectedAmount, 0))}</p>
+          <p className="text-xs text-gray-400 mt-1">{formatEur(totalOverdueAmount)}</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <p className="text-sm text-gray-500">Closers actifs</p>
@@ -184,7 +180,6 @@ export default async function ComptaDashboard({
         </div>
       </div>
 
-      {/* Graphe bar — ventilation cash */}
       <div className="bg-white rounded-xl border border-gray-200 p-5">
         <h2 className="font-semibold text-gray-900 mb-4 capitalize">Répartition du cash — {label}</h2>
         <div className="flex items-end gap-2 h-32">
@@ -206,7 +201,6 @@ export default async function ComptaDashboard({
         )}
       </div>
 
-      {/* Table des closers */}
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="px-5 py-4 border-b border-gray-100">
           <h2 className="font-semibold text-gray-900">Performance par closer — <span className="capitalize font-normal text-gray-500">{label}</span></h2>
@@ -224,16 +218,9 @@ export default async function ComptaDashboard({
           </thead>
           <tbody className="divide-y divide-gray-50">
             {closers.map((closer) => {
-              const allInstallments = closer.deals.flatMap((d) => d.installments);
-              const paidInPeriod = allInstallments.filter(
-                (i) => i.status === "PAID" && i.paidAt && i.paidAt >= start && i.paidAt <= end
-              );
-              const overdueCount = allInstallments.filter(
-                (i) => (i.status === "PENDING" || i.status === "PARTIAL") && i.dueDate < now
-              ).length;
-              const cash = paidInPeriod.reduce((s, i) => s + (i.paidAmount ?? 0), 0);
+              const cash = cashByCloser.get(closer.id) ?? 0;
               const commission = (cash * (closer.commissionRate ?? 0)) / 100;
-
+              const overdueCount = overdueByCloser.get(closer.id) ?? 0;
               return (
                 <tr key={closer.id} className="hover:bg-gray-50">
                   <td className="px-5 py-3 font-medium text-gray-900">
@@ -242,7 +229,7 @@ export default async function ComptaDashboard({
                       <span className="ml-1.5 text-xs text-gray-400">{closer.commissionRate}%</span>
                     )}
                   </td>
-                  <td className="px-5 py-3 text-gray-600">{closer.deals.length}</td>
+                  <td className="px-5 py-3 text-gray-600">{closer._count.deals}</td>
                   <td className="px-5 py-3 font-semibold text-green-600">{formatEur(cash)}</td>
                   <td className="px-5 py-3 font-medium text-purple-600">{formatEur(commission)}</td>
                   <td className="px-5 py-3">

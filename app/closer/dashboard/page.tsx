@@ -47,43 +47,27 @@ export default async function CloserDashboard({
 
   const { start, end, label } = getPeriodBounds(type, year, month, quarter);
 
-  const me = await prisma.user.findUnique({ where: { id: userId } });
+  const [me, paidInPeriod, overdue, upcoming] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, select: { commissionRate: true } }),
+    prisma.installment.findMany({
+      where: { deal: { closerId: userId }, status: "PAID", paidAt: { gte: start, lte: end } },
+      select: { id: true, paidAmount: true, paidAt: true, installmentNumber: true, deal: { select: { clientName: true } } },
+      orderBy: { paidAt: "desc" },
+    }),
+    prisma.installment.findMany({
+      where: { deal: { closerId: userId }, status: { in: ["PENDING", "PARTIAL"] }, dueDate: { lt: now } },
+      select: { id: true, expectedAmount: true, dueDate: true, installmentNumber: true, status: true, comment: true, deal: { select: { clientName: true } } },
+      orderBy: { dueDate: "asc" },
+    }),
+    prisma.installment.findMany({
+      where: { deal: { closerId: userId }, status: "PENDING", dueDate: { gte: now < start ? start : now, lte: end } },
+      select: { id: true, expectedAmount: true, dueDate: true, installmentNumber: true, deal: { select: { clientName: true } } },
+      orderBy: { dueDate: "asc" },
+    }),
+  ]);
+
   const commissionRate = me?.commissionRate ?? 0;
-
-  // Cash collecté sur la période sélectionnée
-  const paidInPeriod = await prisma.installment.findMany({
-    where: {
-      deal: { closerId: userId },
-      status: "PAID",
-      paidAt: { gte: start, lte: end },
-    },
-    include: { deal: true },
-    orderBy: { paidAt: "desc" },
-  });
-
   const cashInPeriod = paidInPeriod.reduce((sum, i) => sum + (i.paidAmount ?? 0), 0);
-
-  // Mensualités impayées (toutes, peu importe la période)
-  const overdue = await prisma.installment.findMany({
-    where: {
-      deal: { closerId: userId },
-      status: { in: ["PENDING", "PARTIAL"] },
-      dueDate: { lt: now },
-    },
-    include: { deal: true },
-    orderBy: { dueDate: "asc" },
-  });
-
-  // Mensualités à venir dans la période sélectionnée
-  const upcoming = await prisma.installment.findMany({
-    where: {
-      deal: { closerId: userId },
-      status: "PENDING",
-      dueDate: { gte: now < start ? start : now, lte: end },
-    },
-    include: { deal: true },
-    orderBy: { dueDate: "asc" },
-  });
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">

@@ -45,3 +45,6 @@ next-env.d.ts
 # SQLite databases
 *.db
 *.db-journal
+
+# Netlify build cache
+/.netlify

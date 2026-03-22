@@ -58,6 +58,14 @@ export async function POST(req: NextRequest) {
     },
   });
 
+  const mensualitesLines = installments.map((inst: { dueDate: string; amount: number }, idx: number) => {
+    const date = new Date(inst.dueDate).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const montant = inst.amount.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
+    return `  ${idx + 1}. ${date} — ${montant}`;
+  });
+
+  const totalAmount2 = totalAmount.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
+
   const message = [
     `🎯 *Nouveau deal signé !*`,
     ``,
@@ -68,6 +76,9 @@ export async function POST(req: NextRequest) {
     `Téléphone client : ${clientPhone || "—"}`,
     `Email : ${clientEmail || "—"}`,
     `Adresse client : ${clientAddress || "—"}`,
+    ``,
+    `💰 Mensualités (total : ${totalAmount2}) :`,
+    ...mensualitesLines,
   ].join("\n");
 
   await sendWhatsAppNotification(message);

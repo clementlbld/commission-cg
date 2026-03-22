@@ -21,21 +21,34 @@ export default function ValidateForm({ installment }: { installment: Installment
   const [comment, setComment] = useState(installment.comment ?? "");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setSuccess(false);
+    setError("");
 
-    await fetch(`/api/installments/${installment.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paidAmount: parseFloat(paidAmount), status, comment }),
-    });
+    try {
+      const res = await fetch(`/api/installments/${installment.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paidAmount: parseFloat(paidAmount), status, comment }),
+      });
 
-    setSuccess(true);
-    setLoading(false);
-    router.refresh();
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Erreur lors de la sauvegarde");
+        return;
+      }
+
+      setSuccess(true);
+      router.refresh();
+    } catch {
+      setError("Erreur réseau, veuillez réessayer");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const STATUSES = [
@@ -106,6 +119,8 @@ export default function ValidateForm({ installment }: { installment: Installment
             ))}
           </div>
         </div>
+
+        {error && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
 
         <div className="flex items-center gap-3">
           <button

@@ -9,11 +9,15 @@ async function sendWhatsAppNotification(message: string) {
   if (!instance || !token || !groupId) return;
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
     await fetch(`https://api.green-api.com/waInstance${instance}/sendMessage/${token}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chatId: groupId, message }),
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
   } catch {
     // Ne pas bloquer la création du deal si WhatsApp échoue
   }

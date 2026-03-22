@@ -1,0 +1,213 @@
+{
+  "version": 3,
+  "pages404": true,
+  "appType": "app",
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/api/auth/[...nextauth]",
+      "regex": "^/api/auth/(.+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPnextauth": "nxtPnextauth"
+      },
+      "namedRegex": "^/api/auth/(?<nxtPnextauth>.+?)(?:/)?$"
+    },
+    {
+      "page": "/api/installments/[id]",
+      "regex": "^/api/installments/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/installments/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/users/[id]",
+      "regex": "^/api/users/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/users/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/compta/closers/[id]",
+      "regex": "^/compta/closers/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/compta/closers/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/compta/payments/[id]",
+      "regex": "^/compta/payments/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/compta/payments/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/compta/setters/[id]",
+      "regex": "^/compta/setters/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/compta/setters/(?<nxtPid>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/api/commissions",
+      "regex": "^/api/commissions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/commissions(?:/)?$"
+    },
+    {
+      "page": "/api/deals",
+      "regex": "^/api/deals(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/deals(?:/)?$"
+    },
+    {
+      "page": "/api/users",
+      "regex": "^/api/users(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/users(?:/)?$"
+    },
+    {
+      "page": "/closer/commissions",
+      "regex": "^/closer/commissions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/closer/commissions(?:/)?$"
+    },
+    {
+      "page": "/closer/dashboard",
+      "regex": "^/closer/dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/closer/dashboard(?:/)?$"
+    },
+    {
+      "page": "/closer/deals",
+      "regex": "^/closer/deals(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/closer/deals(?:/)?$"
+    },
+    {
+      "page": "/closer/deals/new",
+      "regex": "^/closer/deals/new(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/closer/deals/new(?:/)?$"
+    },
+    {
+      "page": "/compta/closers",
+      "regex": "^/compta/closers(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/compta/closers(?:/)?$"
+    },
+    {
+      "page": "/compta/dashboard",
+      "regex": "^/compta/dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/compta/dashboard(?:/)?$"
+    },
+    {
+      "page": "/compta/payments",
+      "regex": "^/compta/payments(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/compta/payments(?:/)?$"
+    },
+    {
+      "page": "/compta/setters",
+      "regex": "^/compta/setters(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/compta/setters(?:/)?$"
+    },
+    {
+      "page": "/compta/utilisateurs",
+      "regex": "^/compta/utilisateurs(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/compta/utilisateurs(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    },
+    {
+      "page": "/setter/commissions",
+      "regex": "^/setter/commissions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/setter/commissions(?:/)?$"
+    },
+    {
+      "page": "/setter/dashboard",
+      "regex": "^/setter/dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/setter/dashboard(?:/)?$"
+    },
+    {
+      "page": "/setter/deals",
+      "regex": "^/setter/deals(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/setter/deals(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

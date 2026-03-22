@@ -19,6 +19,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Rôle invalide" }, { status: 400 });
   }
 
+  if (password.length < 6) {
+    return NextResponse.json({ error: "Le mot de passe doit faire au moins 6 caractères" }, { status: 400 });
+  }
+
+  const rate = parseFloat(commissionRate);
+  if (isNaN(rate) || rate < 0 || rate > 100) {
+    return NextResponse.json({ error: "Taux de commission invalide (0-100)" }, { status: 400 });
+  }
+
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     return NextResponse.json({ error: "Cet email est déjà utilisé" }, { status: 400 });

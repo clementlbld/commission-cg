@@ -14,9 +14,14 @@ export async function PATCH(
   const { id } = await params;
   const { commissionRate } = await req.json();
 
+  const rate = parseFloat(commissionRate);
+  if (isNaN(rate) || rate < 0 || rate > 100) {
+    return NextResponse.json({ error: "Taux de commission invalide (0-100)" }, { status: 400 });
+  }
+
   const user = await prisma.user.update({
     where: { id },
-    data: { commissionRate: parseFloat(commissionRate) || 0 },
+    data: { commissionRate: rate },
   });
 
   return NextResponse.json(user);

@@ -1,0 +1,3 @@
+module.exports=[55483,a=>{a.v({className:"geist_dbbf8c4b-module__5qCx7q__className",variable:"geist_dbbf8c4b-module__5qCx7q__variable"})},33290,a=>{"use strict";var b=a.i(7997),c=a.i(55483);let d={className:c.default.className,style:{fontFamily:"'Geist', 'Geist Fallback'",fontStyle:"normal"}};function e({children:a}){return(0,b.jsx)("html",{lang:"fr",children:(0,b.jsx)("body",{className:`${d.variable} font-sans antialiased bg-gray-50 min-h-screen`,children:a})})}null!=c.default.variable&&(d.variable=c.default.variable),a.s(["default",()=>e,"metadata",0,{title:"Suivi des Commissions",description:"Application de suivi des commissions"}],33290)}];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__fb6b409f._.js.map

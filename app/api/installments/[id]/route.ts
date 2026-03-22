@@ -15,6 +15,15 @@ export async function PATCH(
   const body = await req.json();
   const { paidAmount, status, comment } = body;
 
+  const VALID_STATUSES = ["PENDING", "PAID", "PARTIAL", "DEFERRED"];
+  if (status && !VALID_STATUSES.includes(status)) {
+    return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
+  }
+
+  if (paidAmount != null && (isNaN(parseFloat(paidAmount)) || parseFloat(paidAmount) < 0)) {
+    return NextResponse.json({ error: "Montant invalide" }, { status: 400 });
+  }
+
   const installment = await prisma.installment.update({
     where: { id },
     data: {

@@ -24,6 +24,9 @@ model User {
 model Deal {
   id                     String   @id @default(cuid())
   clientName             String
+  clientPhone            String?
+  clientEmail            String?
+  clientAddress          String?
   totalAmount            Float
   notes                  String?
   closedAt               DateTime @default(now())

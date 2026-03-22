@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { clientName, notes, installments, setterId, closedAt } = body;
+  const { clientName, clientPhone, clientEmail, clientAddress, notes, installments, setterId, closedAt } = body;
 
   if (!clientName || !installments?.length) {
     return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
@@ -39,6 +39,9 @@ export async function POST(req: NextRequest) {
   const deal = await prisma.deal.create({
     data: {
       clientName,
+      clientPhone: clientPhone || undefined,
+      clientEmail: clientEmail || undefined,
+      clientAddress: clientAddress || undefined,
       notes,
       totalAmount,
       closerId: session.user.id,
@@ -55,15 +58,17 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  const montant = totalAmount.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
   const message = [
     `🎯 *Nouveau deal signé !*`,
-    `👤 Client : ${clientName}`,
-    `💰 Montant : ${montant}`,
-    `📞 Closer : ${session.user.name}`,
-    setter ? `🔗 Setter : ${setter.name}` : null,
-    notes ? `📝 Notes : ${notes}` : null,
-  ].filter(Boolean).join("\n");
+    ``,
+    `Closeur : ${session.user.name}`,
+    `Setter : ${setter?.name ?? "—"}`,
+    ``,
+    `Nom client : ${clientName}`,
+    `Téléphone client : ${clientPhone || "—"}`,
+    `Email : ${clientEmail || "—"}`,
+    `Adresse client : ${clientAddress || "—"}`,
+  ].join("\n");
 
   await sendWhatsAppNotification(message);
 

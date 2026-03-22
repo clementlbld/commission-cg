@@ -18,6 +18,9 @@ export default function NewDealForm({ setters }: { setters: Setter[] }) {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
   const [clientName, setClientName] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [clientAddress, setClientAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [closedAt, setClosedAt] = useState(today);
   const [setterId, setSetterId] = useState("");
@@ -56,6 +59,9 @@ export default function NewDealForm({ setters }: { setters: Setter[] }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clientName,
+          clientPhone,
+          clientEmail,
+          clientAddress,
           notes,
           closedAt,
           setterId: setterId || null,
@@ -96,6 +102,32 @@ export default function NewDealForm({ setters }: { setters: Setter[] }) {
             type="text" value={clientName} onChange={(e) => setClientName(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             placeholder="Jean Dupont"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+            <input
+              type="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="+33 6 00 00 00 00"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="client@email.com"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+          <input
+            type="text" value={clientAddress} onChange={(e) => setClientAddress(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="12 rue de la Paix, 75001 Paris"
           />
         </div>
         <div>

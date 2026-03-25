@@ -1,9 +1,14 @@
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import CreateUserForm from "./CreateUserForm";
 import DeleteUserButton from "./DeleteUserButton";
 import EditCommissionButton from "./EditCommissionButton";
 
 export default async function UtilisateursPage() {
+  const session = await auth();
+  if (!session || session.user.role !== "COMPTA") redirect("/login");
+
   const users = await prisma.user.findMany({ orderBy: { createdAt: "asc" } });
 
   const closers = users.filter((u) => u.role === "CLOSER");

@@ -1,3 +1,5 @@
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatEur } from "@/lib/utils";
 import Link from "next/link";
@@ -53,6 +55,9 @@ export default async function ComptaDashboard({
 }: {
   searchParams: Promise<{ type?: string; year?: string; month?: string; quarter?: string; weekStart?: string }>;
 }) {
+  const session = await auth();
+  if (!session || session.user.role !== "COMPTA") redirect("/login");
+
   const sp = await searchParams;
   const now = new Date();
 

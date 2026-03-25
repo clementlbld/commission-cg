@@ -1,8 +1,13 @@
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatEur } from "@/lib/utils";
 import Link from "next/link";
 
 export default async function ComptaClosersPage() {
+  const session = await auth();
+  if (!session || session.user.role !== "COMPTA") redirect("/login");
+
   const now = new Date();
 
   const [closers, paidAgg, overdueAgg] = await Promise.all([

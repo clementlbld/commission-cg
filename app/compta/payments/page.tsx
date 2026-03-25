@@ -1,3 +1,5 @@
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatEur, formatDate, STATUS_LABELS, STATUS_COLORS } from "@/lib/utils";
 import Link from "next/link";
@@ -8,6 +10,9 @@ export default async function ComptaPaymentsPage({
 }: {
   searchParams: Promise<{ status?: string; closerId?: string }>;
 }) {
+  const session = await auth();
+  if (!session || session.user.role !== "COMPTA") redirect("/login");
+
   const { status, closerId } = await searchParams;
 
   const installments = await prisma.installment.findMany({
@@ -17,7 +22,7 @@ export default async function ComptaPaymentsPage({
     },
     include: {
       deal: {
-        include: { closer: true },
+        include: { closer: { select: { id: true, name: true } } },
       },
     },
     orderBy: { dueDate: "asc" },

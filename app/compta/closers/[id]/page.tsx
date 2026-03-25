@@ -1,3 +1,5 @@
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatEur, formatDate, STATUS_LABELS, STATUS_COLORS } from "@/lib/utils";
 import { notFound } from "next/navigation";
@@ -36,6 +38,9 @@ export default async function CloserDetailPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ year?: string; month?: string; quarter?: string; type?: string }>;
 }) {
+  const session = await auth();
+  if (!session || session.user.role !== "COMPTA") redirect("/login");
+
   const { id } = await params;
   const sp = await searchParams;
 

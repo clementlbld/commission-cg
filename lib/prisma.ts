@@ -4,7 +4,6 @@ import { PrismaPg } from "@prisma/adapter-pg";
 function createPrisma() {
   const adapter = new PrismaPg({
     connectionString: process.env.DATABASE_URL!,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
   });
   return new PrismaClient({ adapter } as ConstructorParameters<typeof PrismaClient>[0]);
 }

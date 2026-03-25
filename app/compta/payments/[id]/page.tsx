@@ -1,3 +1,5 @@
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatEur, formatDate } from "@/lib/utils";
 import { notFound } from "next/navigation";
@@ -8,6 +10,9 @@ export default async function PaymentDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await auth();
+  if (!session || session.user.role !== "COMPTA") redirect("/login");
+
   const { id } = await params;
 
   const installment = await prisma.installment.findUnique({
@@ -15,7 +20,7 @@ export default async function PaymentDetailPage({
     include: {
       deal: {
         include: {
-          closer: true,
+          closer: { select: { id: true, name: true } },
           installments: { orderBy: { installmentNumber: "asc" } },
         },
       },

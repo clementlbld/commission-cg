@@ -24,13 +24,15 @@ export async function PATCH(
     return NextResponse.json({ error: "Montant invalide" }, { status: 400 });
   }
 
+  const isPaid = status === "PAID" || status === "PARTIAL";
+
   const installment = await prisma.installment.update({
     where: { id },
     data: {
-      paidAmount: paidAmount != null ? parseFloat(paidAmount) : undefined,
+      paidAmount: isPaid ? (paidAmount != null ? parseFloat(paidAmount) : undefined) : null,
       status,
       comment,
-      paidAt: status === "PAID" || status === "PARTIAL" ? new Date() : null,
+      paidAt: isPaid ? new Date() : null,
       validatedById: session.user.id,
     },
   });

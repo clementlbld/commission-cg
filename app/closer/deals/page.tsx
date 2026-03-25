@@ -46,6 +46,7 @@ export default async function CloserDealsPage() {
                 <div className="text-right">
                   <p className="font-bold text-gray-900">{formatEur(deal.totalAmount)}</p>
                   <p className="text-xs text-green-600">{formatEur(paidTotal)} reçu</p>
+                  {pending > 0 && <p className="text-xs text-gray-400">{pending} en attente</p>}
                 </div>
               </div>
 
@@ -55,7 +56,7 @@ export default async function CloserDealsPage() {
                     <span className="text-xs text-gray-400 w-8">#{inst.installmentNumber}</span>
                     <span className="text-sm text-gray-600 w-24">{formatDate(inst.dueDate)}</span>
                     <span className="text-sm text-gray-900 font-medium w-20">{formatEur(inst.expectedAmount)}</span>
-                    {inst.paidAmount != null && inst.paidAmount !== inst.expectedAmount && (
+                    {inst.paidAmount != null && inst.status !== "PENDING" && inst.paidAmount !== inst.expectedAmount && (
                       <span className="text-xs text-blue-600">(reçu: {formatEur(inst.paidAmount)})</span>
                     )}
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[inst.status]}`}>
@@ -63,9 +64,6 @@ export default async function CloserDealsPage() {
                     </span>
                     {inst.comment && (
                       <span className="text-xs text-gray-400 italic truncate max-w-xs">💬 {inst.comment}</span>
-                    )}
-                    {pending > 0 && (
-                      <span className="ml-auto text-xs text-gray-400">{pending} en attente</span>
                     )}
                   </div>
                 ))}
